@@ -31,7 +31,7 @@
        ;; (send* (send self :get :hand-controller) :start-grasp args)
      (warn ";; can not use hand~%")))
   (:stop-grasp
-   (&rest args)
+   (arm &rest args)
    (if hand-enable
        (hand-open arm)
        ;; (send* (send self :get :hand-controller) :stop-grasp args)
@@ -66,14 +66,31 @@
            (case
             arm
             (:rarm
-             (send *rhand-ri* :angle-vector))
+             (send *rhand-ri* :state :angle-vector))
             (:larm
-             (send *lhand-ri* :angle-vector))
+             (send *lhand-ri* :state :angle-vector))
             (:arms
-             '((send *rhand-ri* :angle-vector)
-               (send *lhand-ri* :angle-vector))))
+             '((send *rhand-ri* :state :angle-vector)
+               (send *lhand-ri* :state :angle-vector))))
          (error ";; no such arm in :gripper ~A~%" arm))
      (warn ";; can not use hand~%")))
+  (:send-joint-angle
+   (arm vector)
+   (if hand-enable
+       (if (memq arm '(:rarm :larm :arms))
+           (case
+            arm
+            (:rarm
+             (send *rhand-ri* :angle-vector vector))
+            (:larm
+             (send *lhand-ri* :angle-vector vector))
+            ;; (:arms
+            ;;  '((send *rhand-ri* :angle-vector)
+            ;;    (send *lhand-ri* :angle-vector)))
+            )
+         (error ";; no such arm in :gripper ~A~%" arm))
+     (warn ";; can not use hand~%")))
+
   ;;  (warning-message 1 ";;!!!!!!!!~%;; (send *ri* :get-joint-angle) METHOD IS DEPRECATED!!~%;; Please use (send *ri* :state :gripper :arms :angle-vector)~%;;!!!!!!!!~%")
   ;;  (if hand-enable
   ;;      (send* (send self :get :hand-controller) :get-joint-angle args)
